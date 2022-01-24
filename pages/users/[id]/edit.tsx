@@ -87,7 +87,7 @@ function EditUserState(props: PropsType) {
       {
         field_id: "avatar",
         data_type: "file",
-        data: userData.avatar,
+        data: userData.avatar, // avatar is the file id of the uploaded file
       },
     ]);
 
@@ -104,6 +104,7 @@ function EditUserState(props: PropsType) {
     const result = await privy.upload(props.userId, "avatar", file);
 
     if (result.data !== undefined) {
+      // Set avatar to the uploaded file id
       updateUserData({ avatar: result.data.id });
     }
   }

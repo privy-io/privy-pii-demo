@@ -41,6 +41,7 @@ function UserShowState(props: PropsType) {
         setUserData({ ...userData, ...responseUserData });
 
         // Download and decrypt the avatar image contents
+        // responseUserData.avatar is the file id of the uploaded avatar
         privy
           .download(props.userId, "avatar", responseUserData.avatar)
           .then((result) => {
