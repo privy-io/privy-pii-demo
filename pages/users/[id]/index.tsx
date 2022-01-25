@@ -4,6 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
+import { UserData as PrivyUserData } from "privy-js";
 
 type PropsType = {
   userId: string;
@@ -24,6 +25,10 @@ function UserShowState(props: PropsType) {
   const [avatar, setAvatar] = useState<Blob | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
+  function updateUserData(data: Partial<UserData>) {
+    setUserData({ ...userData, ...data });
+  }
+
   // Fetch user PII from privy on component mount
   useEffect(() => {
     // For the purpose of this demo, clients tell the server who the requester
@@ -32,25 +37,27 @@ function UserShowState(props: PropsType) {
     // logged in user and what access they should have.
     const privy = buildClient(props.requesterId, props.roles);
 
-    privy.fetchData(props.userId).then((result) => {
-      if (result.data !== undefined) {
-        const responseUserData = formatUserData(
-          result.data as UserDataResponse[]
-        );
+    const onFetchDataSuccess = async (userDataResponse: PrivyUserData[]) => {
+      const userData = formatUserData(userDataResponse as UserDataResponse[]);
 
-        setUserData({ ...userData, ...responseUserData });
+      updateUserData(userData);
 
-        // Download and decrypt the avatar image contents
-        // responseUserData.avatar is the file id of the uploaded avatar
-        privy
-          .download(props.userId, "avatar", responseUserData.avatar)
-          .then((result) => {
-            if (result.data !== undefined) {
-              setAvatar(result.data);
-            }
-          });
+      // Download and decrypt the avatar image contents
+      try {
+        // userData.avatar is the file id of the uploaded avatar
+        const avatarFileId = userData.avatar;
+        const blob = await privy.download(props.userId, "avatar", avatarFileId);
+        setAvatar(blob);
+      } catch (e) {
+        console.log(e);
       }
-    });
+    };
+
+    const onFetchDataFailure = (error: Error) => {
+      console.log(error);
+    };
+
+    privy.fetchData(props.userId).then(onFetchDataSuccess, onFetchDataFailure);
   }, []);
 
   // Construct the avatar url when the avatar value changes
