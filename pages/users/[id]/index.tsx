@@ -4,7 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData } from "privy-js";
+import { UserData as PrivyUserData, PrivyError } from "privy-js";
 
 type PropsType = {
   userId: string;
@@ -53,7 +53,7 @@ function UserShowState(props: PropsType) {
       }
     };
 
-    const onFetchDataFailure = (error: Error) => {
+    const onFetchDataFailure = (error: PrivyError) => {
       console.log(error);
     };
 

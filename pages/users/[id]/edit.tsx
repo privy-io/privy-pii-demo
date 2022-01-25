@@ -5,7 +5,7 @@ import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import PrivyData from "privy-js";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData } from "privy-js";
+import { UserData as PrivyUserData, PrivyError } from "privy-js";
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
@@ -57,7 +57,7 @@ function EditUserState(props: PropsType) {
       updateUserData(userData);
     };
 
-    const onFetchDataFailure = (error: Error) => {
+    const onFetchDataFailure = (error: PrivyError) => {
       console.log(error);
     };
 
