@@ -5,6 +5,7 @@ import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import PrivyData from "privy-js";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
+import { UserData as PrivyUserData, PrivyError } from "privy-js";
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
@@ -51,11 +52,16 @@ function EditUserState(props: PropsType) {
     // Cache privy client instance for subsequent use
     setPrivy(privy);
 
-    privy.fetchData(props.userId).then((result) => {
-      if (result.data !== undefined) {
-        updateUserData(formatUserData(result.data as UserDataResponse[]));
-      }
-    });
+    const onFetchDataSuccess = async (userDataResponse: PrivyUserData[]) => {
+      const userData = formatUserData(userDataResponse as UserDataResponse[]);
+      updateUserData(userData);
+    };
+
+    const onFetchDataFailure = (error: PrivyError) => {
+      console.log(error);
+    };
+
+    privy.fetchData(props.userId).then(onFetchDataSuccess, onFetchDataFailure);
   }, []);
 
   async function saveUserData() {
@@ -63,36 +69,38 @@ function EditUserState(props: PropsType) {
       return;
     }
 
-    const result = await privy.saveData(props.userId, [
-      {
-        field_id: "name",
-        data: userData.name,
-      },
-      {
-        field_id: "username",
-        data: userData.username,
-      },
-      {
-        field_id: "email",
-        data: userData.email,
-      },
-      {
-        field_id: "website",
-        data: userData.website,
-      },
-      {
-        field_id: "bio",
-        data: userData.bio,
-      },
-      {
-        field_id: "avatar",
-        data_type: "file",
-        data: userData.avatar, // avatar is the file id of the uploaded file
-      },
-    ]);
+    try {
+      await privy.saveData(props.userId, [
+        {
+          field_id: "name",
+          data: userData.name,
+        },
+        {
+          field_id: "username",
+          data: userData.username,
+        },
+        {
+          field_id: "email",
+          data: userData.email,
+        },
+        {
+          field_id: "website",
+          data: userData.website,
+        },
+        {
+          field_id: "bio",
+          data: userData.bio,
+        },
+        {
+          field_id: "avatar",
+          data_type: "file",
+          data: userData.avatar, // avatar is the file id of the uploaded file
+        },
+      ]);
 
-    if (result.data !== undefined) {
       router.push(`/users/${props.userId}?${window.location.search}`);
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -101,11 +109,11 @@ function EditUserState(props: PropsType) {
       return;
     }
 
-    const result = await privy.upload(props.userId, "avatar", file);
-
-    if (result.data !== undefined) {
-      // Set avatar to the uploaded file id
-      updateUserData({ avatar: result.data.id });
+    try {
+      const uploadedFile = await privy.upload(props.userId, "avatar", file);
+      updateUserData({ avatar: uploadedFile.id });
+    } catch (e) {
+      console.log(e);
     }
   }
 
