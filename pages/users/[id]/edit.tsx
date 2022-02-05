@@ -98,7 +98,7 @@ function EditUserState(props: PropsType) {
         },
       ]);
 
-      router.push(`/users/${props.userId}?${window.location.search}`);
+      router.push(`/users/${props.userId}${window.location.search}`);
     } catch (e) {
       console.log(e);
     }
