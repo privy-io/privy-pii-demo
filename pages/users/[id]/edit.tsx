@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Link from 'next/link'
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
@@ -25,11 +26,8 @@ function EditUserState(props: PropsType) {
   );
 
   const [userData, setUserData] = useState<UserData>({
-    name: "",
-    username: "",
-    email: "",
-    website: "",
-    bio: "",
+    fullName: "",
+    wallets : "",
     avatar: "",
   });
 
@@ -72,24 +70,12 @@ function EditUserState(props: PropsType) {
     try {
       await privy.saveData(props.userId, [
         {
-          field_id: "name",
-          data: userData.name,
+          field_id: "full-name",
+          data: userData.fullName,
         },
         {
-          field_id: "username",
-          data: userData.username,
-        },
-        {
-          field_id: "email",
-          data: userData.email,
-        },
-        {
-          field_id: "website",
-          data: userData.website,
-        },
-        {
-          field_id: "bio",
-          data: userData.bio,
+          field_id: "wallet-addresses",
+          data: userData.wallets,
         },
         {
           field_id: "avatar",
@@ -149,7 +135,7 @@ function EditUser(props: {
         <header>
           <h1>Privy Demo</h1>
           <nav>
-            <a href="/">Home</a>
+            <Link href="/">Home</Link>
           </nav>
         </header>
 
@@ -166,64 +152,30 @@ function EditUser(props: {
         <div>
           <div className="privy-field-group">
             <div className="privy-field">
-              <label htmlFor="name">Name</label>
+              <label htmlFor="name">Full Name</label>
               <input
                 className="input is-normal"
                 type="text"
                 id="name"
                 placeholder="Jane doe"
-                value={props.userData.name}
-                onChange={(e) => props.onUpdate({ name: e.target.value })}
-              />
-            </div>
-            <div className="privy-field">
-              <label htmlFor="username">Username</label>
-              <input
-                className="input is-normal"
-                type="text"
-                id="username"
-                placeholder="janedoe"
-                value={props.userData.username}
-                onChange={(e) => props.onUpdate({ username: e.target.value })}
+                value={props.userData.fullName}
+                onChange={(e) => props.onUpdate({ fullName: e.target.value })}
               />
             </div>
           </div>
 
           <div className="privy-field-group">
             <div className="privy-field">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="wallets">Wallets</label>
               <input
                 className="input is-normal"
                 type="text"
-                id="email"
-                placeholder="jane@doe.com"
-                value={props.userData.email}
-                onChange={(e) => props.onUpdate({ email: e.target.value })}
+                id="wallets"
+                placeholder="0x123, 0x345"
+                value={props.userData.wallets}
+                // fixme
+                onChange={(e) => props.onUpdate({ wallets: e.target.value })}
               />
-            </div>
-            <div className="privy-field">
-              <label htmlFor="website">Website</label>
-              <input
-                className="input is-normal"
-                type="text"
-                id="website"
-                placeholder="http://example.com"
-                value={props.userData.website}
-                onChange={(e) => props.onUpdate({ website: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="privy-field-group">
-            <div className="privy-field-full">
-              <label htmlFor="bio">Bio</label>
-              <textarea
-                id="bio"
-                className="textarea"
-                placeholder="Tell us about yourself"
-                value={props.userData.bio}
-                onChange={(e) => props.onUpdate({ bio: e.target.value })}
-              ></textarea>
             </div>
           </div>
 

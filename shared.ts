@@ -1,13 +1,16 @@
 export type UserData = {
-  name: string;
-  username: string;
-  email: string;
-  website: string;
-  bio: string;
+  fullName: string;
+  wallets: string;
   avatar: string;
 };
 
-export type UserDataKey = keyof UserData;
+const UserDataPrivyMapping = {
+  "full-name": "fullName",
+  "wallet-addresses": "wallets",
+  "avatar": "avatar",
+}
+
+export type UserDataKey = "full-name" | "wallet-addresses" | "avatar"
 
 export type UserDataResponse = {
   field_id: UserDataKey;
@@ -16,7 +19,7 @@ export type UserDataResponse = {
 
 export function formatUserData(fields: UserDataResponse[]): UserData {
   return fields.reduce((data, field) => {
-    data[field.field_id] = field.data;
+    data[UserDataPrivyMapping[field.field_id]] = field.data;
     return data;
   }, {} as UserData);
 }
