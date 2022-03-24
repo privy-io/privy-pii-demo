@@ -4,7 +4,10 @@ import Head from "next/head";
 import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData, PrivyError } from "privy-js";
+import { UserData as PrivyUserData, PrivyError, Session } from "privy-js";
+import { SignOutLink, useSession } from "../../../components/session";
+
+const NA = "N/A";
 
 type PropsType = {
   userId: string;
@@ -13,15 +16,9 @@ type PropsType = {
 };
 
 function UserShowState(props: PropsType) {
-  const [userData, setUserData] = useState<UserData>({
-    name: "",
-    username: "",
-    email: "",
-    website: "",
-    bio: "",
-    avatar: "",
-  });
+  const session = useSession() as Session;
 
+  const [userData, setUserData] = useState<UserData>({});
   const [avatar, setAvatar] = useState<Blob | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
@@ -35,21 +32,27 @@ function UserShowState(props: PropsType) {
     // is and what roles they have. However, in real-world settings, the server
     // would assign permissions / roles appropriately based on the currently
     // logged in user and what access they should have.
-    const privy = buildClient(props.requesterId, props.roles);
+    const privy = buildClient(session);
 
     const onFetchDataSuccess = async (userDataResponse: PrivyUserData[]) => {
       const userData = formatUserData(userDataResponse as UserDataResponse[]);
 
       updateUserData(userData);
 
-      // Download and decrypt the avatar image contents
-      try {
-        // userData.avatar is the file id of the uploaded avatar
-        const avatarFileId = userData.avatar;
-        const blob = await privy.download(props.userId, "avatar", avatarFileId);
-        setAvatar(blob);
-      } catch (e) {
-        console.log(e);
+      if (userData.avatar) {
+        // Download and decrypt the avatar image contents
+        try {
+          // userData.avatar is the file id of the uploaded avatar
+          const avatarFileId = userData.avatar;
+          const blob = await privy.download(
+            props.userId,
+            "avatar",
+            avatarFileId
+          );
+          setAvatar(blob);
+        } catch (e) {
+          console.log(e);
+        }
       }
     };
 
@@ -98,6 +101,7 @@ function UserShow(props: {
           <h1>Privy Demo</h1>
           <nav>
             <a href="/">Home</a>
+            <SignOutLink />
           </nav>
         </header>
 
@@ -114,36 +118,36 @@ function UserShow(props: {
               />
             )}
           </div>
-          <h2 className="title">User {props.userId}</h2>
+          <p className="title is-6">User {props.userId}</p>
         </div>
 
         <div>
           <div className="privy-field-group">
             <div className="privy-field">
               <strong>Name</strong>
-              <p>{props.userData.name}</p>
+              <p>{props.userData.name || NA}</p>
             </div>
             <div className="privy-field">
               <strong>Username</strong>
-              <p>{props.userData.username}</p>
+              <p>{props.userData.username || NA}</p>
             </div>
           </div>
 
           <div className="privy-field-group">
             <div className="privy-field">
               <strong>Email</strong>
-              <p>{props.userData.email}</p>
+              <p>{props.userData.email || NA}</p>
             </div>
             <div className="privy-field">
               <strong>Website</strong>
-              <p>{props.userData.website}</p>
+              <p>{props.userData.website || NA}</p>
             </div>
           </div>
 
           <div className="privy-field-group">
             <div className="privy-field-full">
               <strong>Bio</strong>
-              <p>{props.userData.bio}</p>
+              <p>{props.userData.bio || NA}</p>
             </div>
           </div>
         </div>

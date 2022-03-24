@@ -5,7 +5,8 @@ import Image from "next/image";
 import { buildClient } from "../../../privy-client";
 import PrivyData from "privy-js";
 import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData, PrivyError } from "privy-js";
+import { UserData as PrivyUserData, PrivyError, Session } from "privy-js";
+import { useSession, SignOutLink } from "../../../components/session";
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
@@ -19,19 +20,13 @@ type PropsType = {
 
 function EditUserState(props: PropsType) {
   const router = useRouter();
+  const session = useSession() as Session;
 
   const [privy, setPrivy] = useState<InstanceType<typeof PrivyData> | null>(
     null
   );
 
-  const [userData, setUserData] = useState<UserData>({
-    name: "",
-    username: "",
-    email: "",
-    website: "",
-    bio: "",
-    avatar: "",
-  });
+  const [userData, setUserData] = useState<UserData>({});
 
   function submitEnabled() {
     return Object.values(userData).every(isPresent);
@@ -47,7 +42,7 @@ function EditUserState(props: PropsType) {
     // is and what roles they have. However, in real-world settings, the server
     // would assign permissions / roles appropriately based on the currently
     // logged in user and what access they should have.
-    const privy = buildClient(props.requesterId, props.roles);
+    const privy = buildClient(session);
 
     // Cache privy client instance for subsequent use
     setPrivy(privy);
@@ -73,28 +68,28 @@ function EditUserState(props: PropsType) {
       await privy.saveData(props.userId, [
         {
           field_id: "name",
-          data: userData.name,
+          data: userData.name as string,
         },
         {
           field_id: "username",
-          data: userData.username,
+          data: userData.username as string,
         },
         {
           field_id: "email",
-          data: userData.email,
+          data: userData.email as string,
         },
         {
           field_id: "website",
-          data: userData.website,
+          data: userData.website as string,
         },
         {
           field_id: "bio",
-          data: userData.bio,
+          data: userData.bio as string,
         },
         {
           field_id: "avatar",
           data_type: "file",
-          data: userData.avatar, // avatar is the file id of the uploaded file
+          data: userData.avatar as string, // avatar is the file id of the uploaded file
         },
       ]);
 
@@ -150,6 +145,7 @@ function EditUser(props: {
           <h1>Privy Demo</h1>
           <nav>
             <a href="/">Home</a>
+            <SignOutLink />
           </nav>
         </header>
 

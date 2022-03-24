@@ -1,10 +1,10 @@
 export type UserData = {
-  name: string;
-  username: string;
-  email: string;
-  website: string;
-  bio: string;
-  avatar: string;
+  name?: string;
+  username?: string;
+  email?: string;
+  website?: string;
+  bio?: string;
+  avatar?: string;
 };
 
 export type UserDataKey = keyof UserData;
