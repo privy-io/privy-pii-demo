@@ -1,4 +1,6 @@
-export type UserData = {
+import { FieldInstance } from "@privy-io/privy-js";
+
+export type UserDataInput = {
   name: string;
   username: string;
   email: string;
@@ -7,16 +9,24 @@ export type UserData = {
   avatar: string;
 };
 
-export type UserDataKey = keyof UserData;
-
-export type UserDataResponse = {
-  field_id: UserDataKey;
-  data: string;
+export type UserData = {
+  name: FieldInstance | null;
+  username: FieldInstance | null;
+  email: FieldInstance | null;
+  website: FieldInstance | null;
+  bio: FieldInstance | null;
+  avatar: FieldInstance | null;
 };
 
-export function formatUserData(fields: UserDataResponse[]): UserData {
+export type UserDataKey = keyof UserData;
+
+export function formatUserData(
+  fields: Array<FieldInstance | null>
+): UserDataInput {
   return fields.reduce((data, field) => {
-    data[field.field_id] = field.data;
+    if (field !== null) {
+      data[field.field_id as UserDataKey] = field.text();
+    }
     return data;
-  }, {} as UserData);
+  }, {} as UserDataInput);
 }

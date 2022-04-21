@@ -3,8 +3,8 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
 import { buildClient } from "../../../privy-client";
-import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData, PrivyError } from "privy-js";
+import { UserData } from "../../../shared";
+import { FieldInstance } from "@privy-io/privy-js";
 
 type PropsType = {
   userId: string;
@@ -13,21 +13,16 @@ type PropsType = {
 };
 
 function UserShowState(props: PropsType) {
-  const [userData, setUserData] = useState<UserData>({
-    name: "",
-    username: "",
-    email: "",
-    website: "",
-    bio: "",
-    avatar: "",
+  const [userData, setUserData] = useState<Omit<UserData, "avatar">>({
+    name: null,
+    username: null,
+    email: null,
+    website: null,
+    bio: null,
   });
 
-  const [avatar, setAvatar] = useState<Blob | null>(null);
+  const [avatar, setAvatar] = useState<FieldInstance | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
-
-  function updateUserData(data: Partial<UserData>) {
-    setUserData({ ...userData, ...data });
-  }
 
   // Fetch user PII from privy on component mount
   useEffect(() => {
@@ -37,27 +32,29 @@ function UserShowState(props: PropsType) {
     // logged in user and what access they should have.
     const privy = buildClient(props.requesterId, props.roles);
 
-    const onFetchDataSuccess = async (userDataResponse: PrivyUserData[]) => {
-      const userData = formatUserData(userDataResponse as UserDataResponse[]);
-
-      updateUserData(userData);
-
-      // Download and decrypt the avatar image contents
+    async function fetchDataFromPrivy() {
       try {
-        // userData.avatar is the file id of the uploaded avatar
-        const avatarFileId = userData.avatar;
-        const blob = await privy.download(props.userId, "avatar", avatarFileId);
-        setAvatar(blob);
-      } catch (e) {
-        console.log(e);
+        const [name, username, email, website, bio] = await privy.get(
+          props.userId,
+          ["name", "username", "email", "website", "bio"]
+        );
+
+        setUserData({
+          name,
+          username,
+          email,
+          website,
+          bio,
+        });
+
+        const avatar = await privy.getFile(props.userId, "avatar");
+        setAvatar(avatar);
+      } catch (error) {
+        console.log(error);
       }
-    };
+    }
 
-    const onFetchDataFailure = (error: PrivyError) => {
-      console.log(error);
-    };
-
-    privy.fetchData(props.userId).then(onFetchDataSuccess, onFetchDataFailure);
+    fetchDataFromPrivy();
   }, []);
 
   // Construct the avatar url when the avatar value changes
@@ -66,7 +63,7 @@ function UserShowState(props: PropsType) {
       return;
     }
 
-    const src = URL.createObjectURL(avatar);
+    const src = URL.createObjectURL(avatar.blob());
     setAvatarSrc(src);
 
     // Cleanup image url after use
@@ -80,10 +77,12 @@ function UserShowState(props: PropsType) {
 
 function UserShow(props: {
   userId: string;
-  userData: UserData;
+  userData: Omit<UserData, "avatar">;
   avatarSrc: string | null;
 }) {
   const router = useRouter();
+
+  const { name, username, email, website, bio } = props.userData;
 
   return (
     <div>
@@ -121,29 +120,29 @@ function UserShow(props: {
           <div className="privy-field-group">
             <div className="privy-field">
               <strong>Name</strong>
-              <p>{props.userData.name}</p>
+              <p>{name && name.text()}</p>
             </div>
             <div className="privy-field">
               <strong>Username</strong>
-              <p>{props.userData.username}</p>
+              <p>{username && username.text()}</p>
             </div>
           </div>
 
           <div className="privy-field-group">
             <div className="privy-field">
               <strong>Email</strong>
-              <p>{props.userData.email}</p>
+              <p>{email && email.text()}</p>
             </div>
             <div className="privy-field">
               <strong>Website</strong>
-              <p>{props.userData.website}</p>
+              <p>{website && website.text()}</p>
             </div>
           </div>
 
           <div className="privy-field-group">
             <div className="privy-field-full">
               <strong>Bio</strong>
-              <p>{props.userData.bio}</p>
+              <p>{bio && bio.text()}</p>
             </div>
           </div>
         </div>

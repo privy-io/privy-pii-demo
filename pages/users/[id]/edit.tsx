@@ -3,9 +3,8 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
 import { buildClient } from "../../../privy-client";
-import PrivyData from "privy-js";
-import { formatUserData, UserData, UserDataResponse } from "../../../shared";
-import { UserData as PrivyUserData, PrivyError } from "privy-js";
+import PrivyClient from "@privy-io/privy-js";
+import { formatUserData, UserDataInput } from "../../../shared";
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
@@ -14,17 +13,17 @@ type PropsType = {
   userId: string;
   requesterId: string;
   roles: string;
-  privy: InstanceType<typeof PrivyData>;
+  privy: InstanceType<typeof PrivyClient>;
 };
 
 function EditUserState(props: PropsType) {
   const router = useRouter();
 
-  const [privy, setPrivy] = useState<InstanceType<typeof PrivyData> | null>(
+  const [privy, setPrivy] = useState<InstanceType<typeof PrivyClient> | null>(
     null
   );
 
-  const [userData, setUserData] = useState<UserData>({
+  const [userData, setUserData] = useState<UserDataInput>({
     name: "",
     username: "",
     email: "",
@@ -37,7 +36,7 @@ function EditUserState(props: PropsType) {
     return Object.values(userData).every(isPresent);
   }
 
-  function updateUserData(data: Partial<UserData>) {
+  function updateUserData(data: Partial<UserDataInput>) {
     setUserData({ ...userData, ...data });
   }
 
@@ -52,16 +51,23 @@ function EditUserState(props: PropsType) {
     // Cache privy client instance for subsequent use
     setPrivy(privy);
 
-    const onFetchDataSuccess = async (userDataResponse: PrivyUserData[]) => {
-      const userData = formatUserData(userDataResponse as UserDataResponse[]);
-      updateUserData(userData);
-    };
+    async function fetchDataFromPrivy() {
+      try {
+        const response = await privy.get(props.userId, [
+          "name",
+          "username",
+          "email",
+          "website",
+          "bio",
+          "avatar",
+        ]);
+        updateUserData(formatUserData(response));
+      } catch (error) {
+        console.log(error);
+      }
+    }
 
-    const onFetchDataFailure = (error: PrivyError) => {
-      console.log(error);
-    };
-
-    privy.fetchData(props.userId).then(onFetchDataSuccess, onFetchDataFailure);
+    fetchDataFromPrivy();
   }, []);
 
   async function saveUserData() {
@@ -70,31 +76,26 @@ function EditUserState(props: PropsType) {
     }
 
     try {
-      await privy.saveData(props.userId, [
+      await privy.put(props.userId, [
         {
-          field_id: "name",
-          data: userData.name,
+          field: "name",
+          value: userData.name,
         },
         {
-          field_id: "username",
-          data: userData.username,
+          field: "username",
+          value: userData.username,
         },
         {
-          field_id: "email",
-          data: userData.email,
+          field: "email",
+          value: userData.email,
         },
         {
-          field_id: "website",
-          data: userData.website,
+          field: "website",
+          value: userData.website,
         },
         {
-          field_id: "bio",
-          data: userData.bio,
-        },
-        {
-          field_id: "avatar",
-          data_type: "file",
-          data: userData.avatar, // avatar is the file id of the uploaded file
+          field: "bio",
+          value: userData.bio,
         },
       ]);
 
@@ -110,8 +111,9 @@ function EditUserState(props: PropsType) {
     }
 
     try {
-      const uploadedFile = await privy.upload(props.userId, "avatar", file);
-      updateUserData({ avatar: uploadedFile.id });
+      const avatar = await privy.putFile(props.userId, "avatar", file);
+      const avatarFileId = avatar.value;
+      updateUserData({ avatar: avatarFileId });
     } catch (e) {
       console.log(e);
     }
@@ -131,8 +133,8 @@ function EditUserState(props: PropsType) {
 
 function EditUser(props: {
   userId: string;
-  userData: UserData;
-  onUpdate: (state: Partial<UserData>) => void;
+  userData: UserDataInput;
+  onUpdate: (state: Partial<UserDataInput>) => void;
   onAvatarUpdate: (avatar: File) => void;
   submitEnabled: boolean;
   onSubmit: () => void;

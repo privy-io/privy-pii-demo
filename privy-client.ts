@@ -1,9 +1,8 @@
 import axios from "axios";
-import PrivyData from "privy-js";
+import PrivyClient, { CustomSession } from "@privy-io/privy-js";
 import {
   NEXT_PUBLIC_PRIVY_KMS_HOST,
   NEXT_PUBLIC_PRIVY_API_HOST,
-  NEXT_PUBLIC_PRIVY_API_KEY,
 } from "./config";
 
 export function getQueryString(requesterId: string, roles: string | void) {
@@ -17,10 +16,10 @@ export function getQueryString(requesterId: string, roles: string | void) {
 }
 
 export function buildClient(requesterId: string, roles: string | void) {
-  return new PrivyData(NEXT_PUBLIC_PRIVY_API_KEY, {
-    apiRoute: NEXT_PUBLIC_PRIVY_API_HOST,
-    kmsRoute: NEXT_PUBLIC_PRIVY_KMS_HOST,
-    authCallback: async () => {
+  return new PrivyClient({
+    apiURL: NEXT_PUBLIC_PRIVY_API_HOST,
+    kmsURL: NEXT_PUBLIC_PRIVY_KMS_HOST,
+    session: new CustomSession(async function authenticate() {
       try {
         const response = await axios.get(
           `/api/token?${getQueryString(requesterId, roles)}`
@@ -29,6 +28,6 @@ export function buildClient(requesterId: string, roles: string | void) {
       } catch (e) {
         console.log("Error fetching access token: ", e);
       }
-    },
+    }),
   });
 }
