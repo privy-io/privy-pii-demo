@@ -2,26 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
-import { buildClient } from "../../../privy-client";
-import PrivyClient from "@privy-io/privy-js";
-import { formatUserData, UserDataInput } from "../../../shared";
+import { formatUserData, formatDisplayAddress, UserDataInput } from "../shared";
+import { useSession, SignOutLink } from "../components/session";
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
 
-type PropsType = {
-  userId: string;
-  requesterId: string;
-  roles: string;
-  privy: InstanceType<typeof PrivyClient>;
-};
-
-function EditUserState(props: PropsType) {
+function EditUserPage() {
+  const session = useSession();
   const router = useRouter();
-
-  const [privy, setPrivy] = useState<InstanceType<typeof PrivyClient> | null>(
-    null
-  );
 
   const [userData, setUserData] = useState<UserDataInput>({
     name: "",
@@ -42,18 +31,9 @@ function EditUserState(props: PropsType) {
 
   // Instantiate client and fetch user data on page load
   useEffect(() => {
-    // For the purpose of this demo, clients tell the server who the requester
-    // is and what roles they have. However, in real-world settings, the server
-    // would assign permissions / roles appropriately based on the currently
-    // logged in user and what access they should have.
-    const privy = buildClient(props.requesterId, props.roles);
-
-    // Cache privy client instance for subsequent use
-    setPrivy(privy);
-
     async function fetchDataFromPrivy() {
       try {
-        const response = await privy.get(props.userId, [
+        const response = await session.privy.get(session.address, [
           "name",
           "username",
           "email",
@@ -71,12 +51,8 @@ function EditUserState(props: PropsType) {
   }, []);
 
   async function saveUserData() {
-    if (privy === null) {
-      return;
-    }
-
     try {
-      await privy.put(props.userId, [
+      await session.privy.put(session.address, [
         {
           field: "name",
           value: userData.name,
@@ -99,19 +75,19 @@ function EditUserState(props: PropsType) {
         },
       ]);
 
-      router.push(`/users/${props.userId}${window.location.search}`);
+      router.push("/");
     } catch (e) {
       console.log(e);
     }
   }
 
   async function uploadAvatar(file: File) {
-    if (privy === null) {
-      return;
-    }
-
     try {
-      const avatar = await privy.putFile(props.userId, "avatar", file);
+      const avatar = await session.privy.putFile(
+        session.address,
+        "avatar",
+        file
+      );
       const avatarFileId = avatar.value;
       updateUserData({ avatar: avatarFileId });
     } catch (e) {
@@ -121,7 +97,7 @@ function EditUserState(props: PropsType) {
 
   return (
     <EditUser
-      userId={props.userId}
+      address={session.address}
       userData={userData}
       onUpdate={updateUserData}
       onAvatarUpdate={uploadAvatar}
@@ -132,7 +108,7 @@ function EditUserState(props: PropsType) {
 }
 
 function EditUser(props: {
-  userId: string;
+  address: string;
   userData: UserDataInput;
   onUpdate: (state: Partial<UserDataInput>) => void;
   onAvatarUpdate: (avatar: File) => void;
@@ -152,6 +128,7 @@ function EditUser(props: {
           <h1>Privy Demo</h1>
           <nav>
             <a href="/">Home</a>
+            <SignOutLink />
           </nav>
         </header>
 
@@ -162,7 +139,7 @@ function EditUser(props: {
             width={48}
             height={48}
           />
-          <h2 className="title">User Profile</h2>
+          <h2 className="title">{formatDisplayAddress(props.address)}</h2>
         </div>
 
         <div>
@@ -304,24 +281,6 @@ function FileUploadFormField(props: {
         ) : null}
       </div>
     </div>
-  );
-}
-
-function EditUserPage(props: any) {
-  const router = useRouter();
-  const id = router.query.id;
-
-  if (typeof id !== "string") {
-    return null;
-  }
-
-  return (
-    <EditUserState
-      {...props}
-      userId={id}
-      requesterId={router.query.requester_id}
-      roles={router.query.roles}
-    />
   );
 }
 

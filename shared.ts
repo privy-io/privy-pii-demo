@@ -30,3 +30,9 @@ export function formatUserData(
     return data;
   }, {} as UserDataInput);
 }
+
+export function formatDisplayAddress(address: string) {
+  const first = address.slice(0, 5);
+  const last = address.slice(address.length - 3, address.length);
+  return `${first}...${last}`;
+}
