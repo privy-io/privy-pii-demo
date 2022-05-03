@@ -130,6 +130,9 @@ function EditUser(props: {
           <nav>
             <Link href="/">Home</Link>
             <SignOutLink />
+            <Link href="https://github.com/privy-io/privy-pii-demo">
+              View on Github
+            </Link>
           </nav>
         </header>
 

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Head from "next/head";
-import { useSession, isMetaMaskEnabled } from "../components/session";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
+import Link from "next/link";
+import { useSession, isMetaMaskEnabled } from "../components/session";
 
 export async function getStaticProps() {
   return {
@@ -62,6 +63,11 @@ function SignIn() {
             >
               Sign in
             </button>
+          </div>
+          <div style={{ marginTop: "16px" }}>
+            <Link href="https://github.com/privy-io/privy-pii-demo">
+              View on Github
+            </Link>
           </div>
         </div>
       </main>
