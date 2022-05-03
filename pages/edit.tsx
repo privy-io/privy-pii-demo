@@ -147,10 +147,11 @@ function EditUser(props: {
             <div className="privy-field">
               <label htmlFor="name">Name</label>
               <input
-                className="input is-normal"
-                type="text"
                 id="name"
+                type="text"
+                className="input is-normal"
                 placeholder="Jane doe"
+                autoComplete="off"
                 value={props.userData.name}
                 onChange={(e) => props.onUpdate({ name: e.target.value })}
               />
@@ -158,10 +159,11 @@ function EditUser(props: {
             <div className="privy-field">
               <label htmlFor="username">Username</label>
               <input
-                className="input is-normal"
-                type="text"
                 id="username"
+                type="text"
+                className="input is-normal"
                 placeholder="janedoe"
+                autoComplete="off"
                 value={props.userData.username}
                 onChange={(e) => props.onUpdate({ username: e.target.value })}
               />
@@ -172,10 +174,11 @@ function EditUser(props: {
             <div className="privy-field">
               <label htmlFor="email">Email</label>
               <input
-                className="input is-normal"
-                type="text"
                 id="email"
+                type="text"
+                className="input is-normal"
                 placeholder="jane@doe.com"
+                autoComplete="off"
                 value={props.userData.email}
                 onChange={(e) => props.onUpdate({ email: e.target.value })}
               />
@@ -183,10 +186,11 @@ function EditUser(props: {
             <div className="privy-field">
               <label htmlFor="website">Website</label>
               <input
-                className="input is-normal"
-                type="text"
                 id="website"
+                type="text"
+                className="input is-normal"
                 placeholder="http://example.com"
+                autoComplete="off"
                 value={props.userData.website}
                 onChange={(e) => props.onUpdate({ website: e.target.value })}
               />
@@ -200,6 +204,7 @@ function EditUser(props: {
                 id="bio"
                 className="textarea"
                 placeholder="Tell us about yourself"
+                autoComplete="off"
                 value={props.userData.bio}
                 onChange={(e) => props.onUpdate({ bio: e.target.value })}
               ></textarea>
