@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { formatUserData, formatDisplayAddress, UserDataInput } from "../shared";
 import { useSession, SignOutLink } from "../components/session";
 
@@ -48,7 +49,7 @@ function EditUserPage() {
     }
 
     fetchDataFromPrivy();
-  }, []);
+  }, [session]);
 
   async function saveUserData() {
     try {
@@ -127,7 +128,7 @@ function EditUser(props: {
         <header>
           <h1>Privy Demo</h1>
           <nav>
-            <a href="/">Home</a>
+            <Link href="/">Home</Link>
             <SignOutLink />
           </nav>
         </header>

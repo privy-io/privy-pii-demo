@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { formatDisplayAddress, UserData } from "../shared";
 import { FieldInstance } from "@privy-io/privy-js";
 import { useSession, SignOutLink } from "../components/session";
@@ -45,7 +46,7 @@ function UserShowPage() {
     }
 
     fetchDataFromPrivy();
-  }, []);
+  }, [session]);
 
   // Construct the avatar url when the avatar value changes
   useEffect(() => {
@@ -90,7 +91,7 @@ function UserShow(props: {
         <header>
           <h1>Privy Demo</h1>
           <nav>
-            <a href="/">Home</a>
+            <Link href="/">Home</Link>
             <SignOutLink />
           </nav>
         </header>
@@ -98,11 +99,11 @@ function UserShow(props: {
         <div className="page-header">
           <div className="avatar">
             {props.avatarSrc != null ? (
-              <img src={props.avatarSrc} />
+              <img src={props.avatarSrc} alt="User avatar" />
             ) : (
               <Image
                 src="/avatar_placeholder.png"
-                alt="Avatar"
+                alt="Avatar placeholder"
                 width={100}
                 height={100}
               />

@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
 
     session.initialize().then(onSuccess, onFailure);
-  }, []);
+  }, [session]);
 
   if (!initialized) {
     return null;
