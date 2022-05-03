@@ -8,6 +8,12 @@ You can imagine this app as a user logging in to something like a "profile" or "
 
 All user data (form fields, file uploads) in this demo are end-to-end encrypted using keys managed on your behalf by the Privy kms.
 
+## Implementation
+
+There are a couple interesting implementation pieces to point out. Most notably, check out the [components/session.tsx](https://github.com/privy-io/privy-pii-demo/blob/main/components/session.tsx) file. In there, you'll find an object that wraps Privy's `SiweSession` object with some useful helpers and is exposed via a React hook so that components can easily make use of it. This object handles authenticating users to Privy as well as signing them out.
+
+Beyond that, check out [pages/index.tsx](https://github.com/privy-io/privy-pii-demo/blob/main/pages/index.tsx) and [pages/edit.tsx](https://github.com/privy-io/privy-pii-demo/blob/main/pages/edit.tsx). The index page displays the user profile information (READ calls to Privy) while the edit page handles updating the user's profile information (WRITE calls to Privy).
+
 ## Setup
 
 #### Install from source
