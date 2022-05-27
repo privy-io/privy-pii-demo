@@ -1,4 +1,4 @@
-import { FieldInstance } from "@privy-io/privy-js";
+import { FieldInstance } from "@privy-io/privy-browser";
 
 export type UserDataInput = {
   name: string;

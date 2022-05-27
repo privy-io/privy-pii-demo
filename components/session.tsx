@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { useRouter } from "next/router";
-import PrivyClient, { SiweSession } from "@privy-io/privy-js";
+import { PrivyClient, SiweSession } from "@privy-io/privy-browser";
 import {
   NEXT_PUBLIC_PRIVY_API_HOST,
   NEXT_PUBLIC_PRIVY_API_KEY,
