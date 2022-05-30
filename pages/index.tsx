@@ -4,7 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { formatDisplayAddress, UserData } from "../shared";
-import { FieldInstance } from "@privy-io/privy-js";
+import { FieldInstance } from "@privy-io/privy-browser";
 import { useSession, SignOutLink } from "../components/session";
 
 function UserShowPage() {
