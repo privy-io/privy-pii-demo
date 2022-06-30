@@ -105,7 +105,9 @@ function UserShow(props: {
               <img src={props.avatarSrc} alt="User avatar" />
             ) : (
               <Image
-                src="/avatar_placeholder.png"
+                src={
+                  process.env.NEXT_PUBLIC_BASE_PATH + "/avatar_placeholder.png"
+                }
                 alt="Avatar placeholder"
                 width={100}
                 height={100}
