@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatDisplayAddress, UserData } from "../shared";
 import { FieldInstance } from "@privy-io/privy-browser";
 import { useSession, SignOutLink } from "../components/session";
+import avatarPlaceholder from "../public/avatar_placeholder.png";
 
 function UserShowPage() {
   const session = useSession();
@@ -101,15 +102,19 @@ function UserShow(props: {
         <div className="page-header">
           <div className="avatar">
             {props.avatarSrc != null ? (
-              <img src={props.avatarSrc} alt="User avatar" />
+              <Image
+                src={props.avatarSrc}
+                alt="User avatar"
+                width={100}
+                height={100}
+              />
             ) : (
               <Image
-                src={
-                  process.env.NEXT_PUBLIC_BASE_PATH + "/avatar_placeholder.png"
-                }
+                src={avatarPlaceholder}
                 alt="Avatar placeholder"
                 width={100}
                 height={100}
+                quality={90}
               />
             )}
           </div>

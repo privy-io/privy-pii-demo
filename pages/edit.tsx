@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatUserData, formatDisplayAddress, UserDataInput } from "../shared";
 import { useSession, SignOutLink } from "../components/session";
+import privyLogo from '../public/privy-logo.png'
 
 const isBlank = (s: string | null | void) => s != null && s.trim() === "";
 const isPresent = (s: string | null | void) => !isBlank(s);
@@ -137,10 +138,11 @@ function EditUser(props: {
 
         <div className="page-header">
           <Image
-            src={process.env.NEXT_PUBLIC_BASE_PATH + "/privy-logo.png"}
+            src={privyLogo}
             alt="Privy logo"
             width={48}
             height={48}
+            quality={90}
           />
           <h2 className="title">{formatDisplayAddress(props.address)}</h2>
         </div>
